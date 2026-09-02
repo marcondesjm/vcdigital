@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Teste de Login - Você Digital</h2>
+<button onclick="testLogin()">Testar Login</button>
+<pre id="result"></pre>
+<script>
+async function testLogin() {
+  const el = document.getElementById('result');
+  el.textContent = 'Enviando request para http://localhost:8000/login/ ...';
+  try {
+    const res = await fetch('http://localhost:8000/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'marcondesgestaotrafego@gmail.com',
+        password: 'Mjm1978*'
+      })
+    });
+    const data = await res.json();
+    el.textContent = 'STATUS: ' + res.status + '\n' + JSON.stringify(data, null, 2);
+  } catch (e) {
+    el.textContent = 'ERRO: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>

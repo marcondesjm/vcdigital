@@ -1,0 +1,7 @@
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic[email]>=2.0.0
+cryptography>=41.0.0
+pyhanko>=0.20.0
+PyPDF2>=3.0.0
+python-multipart>=0.0.6

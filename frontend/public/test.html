@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Teste de Login</title></head>
+<body style="background:#0f172a;color:#fff;font-family:sans-serif;padding:40px;">
+<h2>Teste de Conexão com API - Você Digital</h2>
+<button onclick="testLogin()" style="padding:10px 20px;background:#10b981;color:#fff;border:none;cursor:pointer;">Testar Login Direto</button>
+<pre id="result" style="background:#1e293b;padding:20px;margin-top:20px;border-radius:8px;"></pre>
+<script>
+async function testLogin() {
+  const el = document.getElementById('result');
+  el.textContent = 'Enviando...';
+  try {
+    const res = await fetch('http://localhost:8000/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'marcondesgestaotrafego@gmail.com',
+        password: 'Mjm1978*'
+      })
+    });
+    const data = await res.json();
+    el.textContent = 'STATUS: ' + res.status + '\n' + JSON.stringify(data, null, 2);
+  } catch (e) {
+    el.textContent = 'ERRO: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>

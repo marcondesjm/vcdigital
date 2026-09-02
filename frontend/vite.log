@@ -1,0 +1,16 @@
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m464[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.1.200:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.240.1:[1m5173[22m/[39m
+[2m17:20:56[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/services/api.ts[22m
+[2m17:20:56[22m [36m[1m[vite][22m[39m [32m✨ new dependencies optimized: [33maxios[32m[39m
+[2m17:20:56[22m [36m[1m[vite][22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[2m17:41:54[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/pages/Login.tsx[22m
+[2m17:42:29[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/pages/Login.tsx[22m
+[2m17:52:06[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/pages/Login.tsx[22m
+[2m17:53:37[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m17:55:48[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/services/api.ts[22m
+[2m18:00:04[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/services/api.ts[22m
+[2m18:01:36[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
