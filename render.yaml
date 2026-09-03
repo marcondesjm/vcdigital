@@ -2,23 +2,19 @@ services:
   - type: web
     name: voce-digital-backend
     runtime: python
-    region: sao-paulo
-    plan: free
+    repo: https://github.com/marcondesjm/vcdigital
+    branch: master
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: VOCE_DIGITAL_MASTER_KEY
-        value: peNrjJ7xHXBM_FFJy9jTLNj_dGp2hmkoj-tXvIfw9lM=
       - key: ENVIRONMENT
         value: production
       - key: SQLITE_MODE
-        value: "false"
+        value: false
+      - key: VOCE_DIGITAL_MASTER_KEY
+        value: peNrjJ7xHXBM_FFJy9jTLNj_dGp2hmkoj-tXvIfw9lM=
       - key: SUPABASE_URL
-        value: ""  # Configure após criar o banco no Supabase
+        value: postgresql://postgres:Mjm1978*@db.mhdermskrgmqiiabjie.supabase.co:5432/postgres
       - key: SUPABASE_KEY
-        value: ""  # Configure após criar o banco no Supabase
-    buildCommand: |
-      cd backend
-      pip install -r requirements.txt
-    startCommand: |
-      cd backend
-      uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    autoDeploy: true
+        value: Mjm1978*
