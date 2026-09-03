@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import type { Employee } from '../types'
 import { useUser } from '../contexts/UserContext'
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8001' : 'https://voce-digital-backend.onrender.com')
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8001' : '')
 
 export default function Employees() {
   const { user } = useUser()
