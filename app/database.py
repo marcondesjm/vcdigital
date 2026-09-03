@@ -113,10 +113,7 @@ def get_db_connection() -> Iterator[Any]:
         from psycopg2.extras import RealDictCursor
 
         conn = psycopg2.connect(
-            host=settings.SUPABASE_URL.split("://")[1].split("/")[0],
-            database=settings.SUPABASE_URL.split("/")[-1],
-            user=settings.SUPABASE_URL.split("://")[1].split(":")[0],
-            password=settings.SUPABASE_KEY,
+            settings.SUPABASE_URL,
             cursor_factory=RealDictCursor
         )
         try:
