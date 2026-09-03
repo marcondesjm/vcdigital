@@ -131,6 +131,19 @@ def compute_pdf_hash(pdf_bytes: bytes) -> str:
 
 # --- ENDPOINTS ---
 
+@app.get("/health")
+async def health():
+    """Endpoint de status para monitoramento (Vercel/Health Check)."""
+    return {
+        "status": "healthy",
+        "database": "sqlite" if is_sqlite_mode() else "supabase",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/")
+async def root():
+    return {"message": "Voce Digital API is running"}
+
 @app.post("/clients/")
 async def create_client(client: ClientCreate):
     """Cria um novo cliente associado ao escritório (tenant)."""

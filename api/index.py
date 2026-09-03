@@ -8,4 +8,13 @@ from fastapi import FastAPI
 from app.main import app as fastapi_app
 
 app = FastAPI()
+
+@app.get("/api/health")
+async def health_api():
+    return {"status": "healthy", "source": "api/index.py"}
+
+@app.get("/health")
+async def health_root():
+    return {"status": "healthy", "source": "api/index.py"}
+
 app.mount("/api", fastapi_app)
