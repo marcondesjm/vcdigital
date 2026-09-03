@@ -17,4 +17,14 @@ async def health_api():
 async def health_root():
     return {"status": "healthy", "source": "api/index.py"}
 
+@app.get("/api/config")
+async def config_debug():
+    from app.config import settings, is_sqlite_mode
+    return {
+        "SQLITE_MODE": settings.SQLITE_MODE,
+        "SUPABASE_URL": settings.SUPABASE_URL,
+        "SUPABASE_KEY": settings.SUPABASE_KEY,
+        "is_sqlite_mode": is_sqlite_mode(),
+    }
+
 app.mount("/api", fastapi_app)
