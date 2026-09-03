@@ -3,7 +3,7 @@ import { listClients, listClientCertificates } from '../services/api'
 import { useUser } from '../contexts/UserContext'
 import type { Client, CertificateMetadata } from '../types'
 
-const BACKEND_URL = 'http://localhost:8001'
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8001' : 'https://voce-digital-backend.onrender.com')
 
 export default function SignaturePortal() {
   const { user } = useUser()

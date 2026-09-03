@@ -14,7 +14,7 @@ import type {
   UploadResponse,
 } from '../types'
 
-const BACKEND_URL = 'http://localhost:8001'
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8001' : 'https://voce-digital-backend.onrender.com')
 const electronApi = (window as any).api
 
 function unwrapError(e: unknown): string {
