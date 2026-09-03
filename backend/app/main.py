@@ -36,8 +36,8 @@ from app.database import (
     get_permissions_by_cert,
     employee_can_use_certificate,
     get_tenant_by_id,
-    is_sqlite_mode,
 )
+from app.config import settings, is_production, is_sqlite_mode
 
 # --- CONFIGURAÇÕES ---
 
@@ -50,9 +50,20 @@ cipher_suite = Fernet(MASTER_KEY)
 app = FastAPI(title="Você Digital - API de Custódia e Auditoria")
 
 # --- CONFIGURAÇÃO DE CORS ---
+# Em desenvolvimento, permite todas as origens
+# Em produção, restringe para origens específicas
+if is_production():
+    allow_origins_list = [
+        "https://voce-digital.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+else:
+    allow_origins_list = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Em produção, substituir por ["http://localhost:5173"]
+    allow_origins=allow_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -227,7 +238,7 @@ async def upload_certificate(
         from app.database import get_db_connection
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            if is_sqlite_mode:
+            if is_sqlite_mode():
                 cursor.execute(
                     """INSERT INTO certificates
                        (id, client_id, tenant_id, cert_model, cert_type, provider,

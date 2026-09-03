@@ -2,11 +2,27 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const axios = require('axios')
 
-const API_URL = 'http://localhost:8001'
+// Configuração da URL da API
+// Em desenvolvimento: localhost:8000
+// Em produção (Render): https://voce-digital-backend.onrender.com
+// Em Web (Vercel): a mesma API do Render
+const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
+const isWeb = process.env.IS_WEB === 'true' || !app.isPackaged && process.type === 'web'
+// Forçar isWeb quando não é Electron nativo
+const forceWebMode = typeof process.versions === 'undefined' || !process.versions.electron
+
+const API_URL = isDev
+  ? 'http://localhost:8000'
+  : 'https://voce-digital-backend.onrender.com'
 
 let mainWindow
 
 function createWindow() {
+  // Se for web, não cria janela Electron
+  if (isWeb && app.isPackaged) {
+    return
+  }
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -24,12 +40,21 @@ function createWindow() {
   })
 
   mainWindow.loadFile(path.join(__dirname, 'dist', 'index.html'))
+
+  // Abrir DevTools em modo desenvolvimento
+  if (isDev) {
+    mainWindow.webContents.openDevTools({ mode: 'detach' })
+  }
 }
 
 app.whenReady().then(createWindow)
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+  if (!isWeb && process.platform !== 'darwin') app.quit()
+})
+
+app.on('activate', () => {
+  if (!isWeb && BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
 // ============================================
@@ -38,28 +63,53 @@ app.on('window-all-closed', () => {
 
 // --- AUTH ---
 ipcMain.handle('login', async (event, { email, password }) => {
-  const response = await axios.post(`${API_URL}/login/`, { email, password })
-  return response.data
+  try {
+    const response = await axios.post(`${API_URL}/login`, { email, password })
+    return response.data
+  } catch (error) {
+    console.error('Erro no login:', error.response?.data || error.message)
+    return { status: 'error', message: error.response?.data?.detail || error.message }
+  }
 })
 
 // --- CLIENTS ---
 ipcMain.handle('create-client', async (event, { name, document }) => {
-  const response = await axios.post(`${API_URL}/clients/`, { name, document })
-  return response.data
+  try {
+    const response = await axios.post(`${API_URL}/clients/`, { name, document })
+    return response.data
+  } catch (error) {
+    console.error('Erro ao criar cliente:', error.response?.data || error.message)
+    return { status: 'error', message: error.response?.data?.detail || error.message }
+  }
 })
 
 ipcMain.handle('list-clients', async () => {
-  const response = await axios.get(`${API_URL}/clients/`)
-  return response.data
+  try {
+    const response = await axios.get(`${API_URL}/clients/`)
+    return response.data
+  } catch (error) {
+    console.error('Erro ao listar clientes:', error.message)
+    return { status: 'error', clients: [] }
+  }
 })
 
 ipcMain.handle('get-client', async (event, clientId) => {
-  const response = await axios.get(`${API_URL}/clients/${clientId}`)
-  return response.data
+  try {
+    const response = await axios.get(`${API_URL}/clients/${clientId}`)
+    return response.data
+  } catch (error) {
+    console.error('Erro ao buscar cliente:', error.message)
+    return { status: 'error', client: null }
+  }
 })
 
 // --- CERTIFICATES ---
 ipcMain.handle('select-file', async (event, filters) => {
+  if (isWeb) {
+    // Em web, retorna null (o arquivo é selecionado pelo browser)
+    return { canceled: false, filePaths: [] }
+  }
+
   const defaultFilters = [
     { name: 'Certificado Digital', extensions: ['pfx', 'p12'] },
     { name: 'PDF Document', extensions: ['pdf'] },
@@ -78,26 +128,41 @@ ipcMain.handle('upload-certificate', async (event, { filePath, password, clientI
   form.append('file', fs.createReadStream(filePath))
   form.append('password', password)
   form.append('client_id', clientId)
-  form.append('cert_model', certModel)  // Modelo agnóstico: A1, A3, A4, SE, etc.
-  form.append('cert_type', certType)   // 'file', 'token', 'hardware'
+  form.append('cert_model', certModel)
+  form.append('cert_type', certType)
   form.append('employee_id', employeeId || '')
 
-  const response = await axios.post(`${API_URL}/upload-certificate/`, form, {
-    headers: form.getHeaders(),
-  })
-  return response.data
+  try {
+    const response = await axios.post(`${API_URL}/upload-certificate/`, form, {
+      headers: form.getHeaders(),
+    })
+    return response.data
+  } catch (error) {
+    console.error('Erro no upload:', error.response?.data || error.message)
+    return { status: 'error', message: error.response?.data?.detail || error.message }
+  }
 })
 
 ipcMain.handle('list-client-certificates', async (event, clientId) => {
-  const response = await axios.get(`${API_URL}/clients/${clientId}/certificates`)
-  return response.data
+  try {
+    const response = await axios.get(`${API_URL}/clients/${clientId}/certificates`)
+    return response.data
+  } catch (error) {
+    console.error('Erro ao listar certificados:', error.message)
+    return { status: 'error', certificates: [] }
+  }
 })
 
 ipcMain.handle('revoke-certificate', async (event, { certId, employeeId }) => {
-  const response = await axios.delete(
-    `${API_URL}/certificates/${certId}?employee_id=${employeeId}`
-  )
-  return response.data
+  try {
+    const response = await axios.delete(
+      `${API_URL}/certificates/${certId}?employee_id=${employeeId}`
+    )
+    return response.data
+  } catch (error) {
+    console.error('Erro ao revogar certificado:', error.response?.data || error.message)
+    return { status: 'error', message: error.response?.data?.detail || error.message }
+  }
 })
 
 // --- SIGN PDF ---
@@ -109,51 +174,99 @@ ipcMain.handle('sign-pdf', async (event, { pdfPath, certificateId, employeeId })
   form.append('certificate_id', certificateId)
   form.append('employee_id', employeeId)
 
-  const response = await axios.post(`${API_URL}/sign-pdf/`, form, {
-    headers: form.getHeaders(),
-    maxBodyLength: Infinity,
-    maxContentLength: Infinity,
-  })
-  return response.data
+  try {
+    const response = await axios.post(`${API_URL}/sign-pdf/`, form, {
+      headers: form.getHeaders(),
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+      timeout: 120000,
+    })
+    return response.data
+  } catch (error) {
+    console.error('Erro na assinatura:', error.response?.data || error.message)
+    return {
+      status: 'error',
+      message: error.response?.data?.detail || error.message
+    }
+  }
 })
 
 // --- AUDIT LOGS ---
 ipcMain.handle('get-audit-logs', async (event, { clientId, status }) => {
   const params = status ? `?status=${status}` : ''
-  const response = await axios.get(`${API_URL}/audit-logs/${clientId}${params}`)
-  return response.data
+  try {
+    const response = await axios.get(`${API_URL}/audit-logs/${clientId}${params}`)
+    return response.data
+  } catch (error) {
+    console.error('Erro ao buscar logs:', error.message)
+    return { status: 'error', logs: [] }
+  }
 })
 
 // --- EMPLOYEES ---
 ipcMain.handle('list-employees', async (event, tenantId) => {
-  const response = await axios.get(`${API_URL}/employees/?tenant_id=${tenantId}`)
-  return response.data
+  try {
+    const response = await axios.get(`${API_URL}/employees/?tenant_id=${tenantId}`)
+    return response.data
+  } catch (error) {
+    console.error('Erro ao listar funcionários:', error.message)
+    return { status: 'error', employees: [] }
+  }
 })
 
 ipcMain.handle('create-employee', async (event, data) => {
-  const response = await axios.post(`${API_URL}/employees/`, data)
-  return response.data
+  try {
+    const response = await axios.post(`${API_URL}/employees/`, data)
+    return response.data
+  } catch (error) {
+    console.error('Erro ao criar funcionário:', error.response?.data || error.message)
+    return { status: 'error', message: error.response?.data?.detail || error.message }
+  }
 })
 
 // --- PERMISSIONS ---
 ipcMain.handle('list-permissions', async (event, certId) => {
-  const response = await axios.get(`${API_URL}/certificates/${certId}/permissions`)
-  return response.data
+  try {
+    const response = await axios.get(`${API_URL}/certificates/${certId}/permissions`)
+    return response.data
+  } catch (error) {
+    console.error('Erro ao listar permissões:', error.message)
+    return { status: 'error', permissions: [] }
+  }
 })
 
 ipcMain.handle('grant-permission', async (event, { employeeId, certificateId }) => {
-  const response = await axios.post(`${API_URL}/permissions/grant`, { employeeId, certificateId })
-  return response.data
+  try {
+    const response = await axios.post(`${API_URL}/permissions/grant`, {
+      employee_id: employeeId,
+      certificate_id: certificateId
+    })
+    return response.data
+  } catch (error) {
+    console.error('Erro ao conceder permissão:', error.response?.data || error.message)
+    return { status: 'error', message: error.response?.data?.detail || error.message }
+  }
 })
 
 ipcMain.handle('revoke-permission', async (event, permId) => {
-  const response = await axios.post(`${API_URL}/permissions/revoke/${permId}`)
-  return response.data
+  try {
+    const response = await axios.post(`${API_URL}/permissions/revoke/${permId}`)
+    return response.data
+  } catch (error) {
+    console.error('Erro ao revogar permissão:', error.response?.data?.detail || error.message)
+    return { status: 'error', message: error.response?.data?.detail || error.message }
+  }
 })
 
-// --- JANELA ---
-ipcMain.handle('minimize-window', () => mainWindow.minimize())
-ipcMain.handle('maximize-window', () => {
-  mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
+// --- WINDOW ---
+ipcMain.handle('minimize-window', () => {
+  if (mainWindow) mainWindow.minimize()
 })
-ipcMain.handle('close-window', () => mainWindow.close())
+ipcMain.handle('maximize-window', () => {
+  if (mainWindow) {
+    mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
+  }
+})
+ipcMain.handle('close-window', () => {
+  if (mainWindow) mainWindow.close()
+})

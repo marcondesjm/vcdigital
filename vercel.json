@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://voce-digital-backend.onrender.com/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/dist/$1"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://voce-digital-backend.onrender.com/$1"
+    }
+  ]
+}
