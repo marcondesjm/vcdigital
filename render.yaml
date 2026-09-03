@@ -2,8 +2,7 @@ services:
   - type: web
     name: voce-digital-backend
     runtime: python
-    repo: https://github.com/marcondesjm/vcdigital
-    branch: master
+    region: ohio
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
