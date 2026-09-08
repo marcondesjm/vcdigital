@@ -36,14 +36,20 @@ async def test_db():
         import psycopg2
         from psycopg2.extras import RealDictCursor
         import os as _os
+        import urllib.parse as _up
 
         safe_url = "url_parcial"
 
-        # Tentativa com a URI original completa
-        # A senha Mjm1978* tem o caractere * que pode ser tratado como %2A na URI
-        db_url = os.getenv("DATABASE_URL", "postgresql://postgres.mhdermskrgmqoiiabjie:Mjm1978%2A@aws-1-us-west-2.pooler.supabase.com:6543/postgres")
+        # Construir a URI manualmente com o encoding correto do *
+        db_url = os.getenv("DATABASE_URL")
+        if not db_url:
+            return {"status": "error", "message": "DATABASE_URL is not set"}
+
+        # Substituir o * não codificado por %2A se necessário para o psycopg2
+        safe_db_url = db_url.replace("Mjm1978*", "Mjm1978%2A")
+
         conn = psycopg2.connect(
-            db_url,
+            safe_db_url,
             cursor_factory=RealDictCursor,
             sslmode='require',
             connect_timeout=10
