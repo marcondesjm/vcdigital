@@ -39,13 +39,11 @@ async def test_db():
 
         safe_url = "url_parcial"
 
-        # Tentativa com parâmetros nomeados explícitos
+        # Tentativa com a URI original completa
+        # A senha Mjm1978* tem o caractere * que pode ser tratado como %2A na URI
+        db_url = os.getenv("DATABASE_URL", "postgresql://postgres.mhdermskrgmqoiiabjie:Mjm1978%2A@aws-1-us-west-2.pooler.supabase.com:6543/postgres")
         conn = psycopg2.connect(
-            host="aws-1-us-west-2.pooler.supabase.com",
-            database="postgres",
-            user="postgres.mhdermskrgmqoiiabjie",
-            password="Mjm1978*",
-            port=6543,
+            db_url,
             cursor_factory=RealDictCursor,
             sslmode='require',
             connect_timeout=10
