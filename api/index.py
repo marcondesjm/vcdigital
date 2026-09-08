@@ -36,13 +36,17 @@ async def test_db():
         import psycopg2
         from psycopg2.extras import RealDictCursor
         import os as _os
-        import urllib.parse as _up
 
         safe_url = "url_parcial"
 
-        # Tentativa com a URI original completa
+        # Tentativa com parâmetros nomeados explícitos
+        # Usando apenas 'postgres' como usuário e a senha Mjm1978*
         conn = psycopg2.connect(
-            "postgresql://postgres.mhdermskrgmqoiiabjie:Mjm1978%2A@aws-1-us-west-2.pooler.supabase.com:6543/postgres",
+            host="aws-1-us-west-2.pooler.supabase.com",
+            database="postgres",
+            user="postgres",
+            password="Mjm1978*",
+            port=6543,
             cursor_factory=RealDictCursor,
             sslmode='require',
             connect_timeout=10
