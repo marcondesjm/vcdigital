@@ -40,10 +40,9 @@ async def test_db():
 
         safe_url = "url_parcial"
 
-        # Tentativa com a URI original, mas com o nome de usuário simplificado
-        # e garantindo que o '*' está corretamente escapado
+        # Tentativa com a URI original completa
         conn = psycopg2.connect(
-            "postgresql://postgres:Mjm1978%2A@aws-1-us-west-2.pooler.supabase.com:6543/postgres",
+            "postgresql://postgres.mhdermskrgmqoiiabjie:Mjm1978%2A@aws-1-us-west-2.pooler.supabase.com:6543/postgres",
             cursor_factory=RealDictCursor,
             sslmode='require',
             connect_timeout=10
