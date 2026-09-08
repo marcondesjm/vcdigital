@@ -40,16 +40,14 @@ async def test_db():
 
         safe_url = "url_parcial"
 
-        # Construir a URI manualmente com o encoding correto do *
-        db_url = os.getenv("DATABASE_URL")
-        if not db_url:
-            return {"status": "error", "message": "DATABASE_URL is not set"}
-
-        # Substituir o * não codificado por %2A se necessário para o psycopg2
-        safe_db_url = db_url.replace("Mjm1978*", "Mjm1978%2A")
-
+        # Tentativa com parâmetros nomeados explícitos
+        # Garantindo que o nome de usuário e senha estão corretos
         conn = psycopg2.connect(
-            safe_db_url,
+            host="aws-1-us-west-2.pooler.supabase.com",
+            database="postgres",
+            user="postgres.mhdermskrgmqoiiabjie",
+            password="Mjm1978*",
+            port=6543,
             cursor_factory=RealDictCursor,
             sslmode='require',
             connect_timeout=10
