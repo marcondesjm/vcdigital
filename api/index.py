@@ -40,14 +40,25 @@ async def test_db():
 
         safe_url = "url_parcial"
 
-        # Tentativa com parâmetros nomeados explícitos
-        # Garantindo que o nome de usuário e senha estão corretos
+        # Tentativa usando urllib.parse para extrair os componentes da URI
+        db_url = os.getenv("DATABASE_URL")
+        if not db_url:
+            return {"status": "error", "message": "DATABASE_URL is not set"}
+
+        parsed = _up.urlparse(db_url)
+
+        # O problema pode ser o '*' no password não estar sendo tratado corretamente
+        # Vamos usar o password já decodificado (unquote) para garantir que o * seja lido
+        password = _up.unquote(parsed.password or "Mjm1978*")
+
+        # Conectar com parâmetros nomeados explícitos
+        # Isso evita problemas de parse da URI pelo psycopg2
         conn = psycopg2.connect(
-            host="aws-1-us-west-2.pooler.supabase.com",
+            host=parsed.hostname or "aws-1-us-west-2.pooler.supabase.com",
             database="postgres",
-            user="postgres.mhdermskrgmqoiiabjie",
-            password="Mjm1978*",
-            port=6543,
+            user=parsed.username or "postgres.mhdermskrgmqoiiabjie",
+            password=password,
+            port=parsed.port or 6543,
             cursor_factory=RealDictCursor,
             sslmode='require',
             connect_timeout=10
