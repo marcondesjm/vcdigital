@@ -39,14 +39,10 @@ async def test_db():
 
         safe_url = "url_parcial"
 
-        # Tentativa com parâmetros nomeados explícitos
-        # Usando apenas 'postgres' como usuário e a senha Mjm1978*
+        # Tentativa com a URI original, mas com o nome de usuário simplificado
+        # e garantindo que o '*' está corretamente escapado
         conn = psycopg2.connect(
-            host="aws-1-us-west-2.pooler.supabase.com",
-            database="postgres",
-            user="postgres",
-            password="Mjm1978*",
-            port=6543,
+            "postgresql://postgres:Mjm1978*@aws-1-us-west-2.pooler.supabase.com:6543/postgres",
             cursor_factory=RealDictCursor,
             sslmode='require',
             connect_timeout=10
