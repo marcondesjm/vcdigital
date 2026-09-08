@@ -121,7 +121,7 @@ def get_db_connection() -> Iterator[Any]:
         # Se for URI, podemos extrair ou usar parâmetros fixos se falhar
         try:
             parsed = _up.urlparse(db_url)
-            username = parsed.username or "postgres.mhdermskrgmqoiabjie"
+            username = parsed.username or "postgres.mhdermskrgmqoiiabjie"
             password = _up.unquote(parsed.password or "Mjm1978*")
             hostname = parsed.hostname or "aws-1-us-west-2.pooler.supabase.com"
             port = parsed.port or 6543
@@ -142,7 +142,7 @@ def get_db_connection() -> Iterator[Any]:
             conn = psycopg2.connect(
                 host="aws-1-us-west-2.pooler.supabase.com",
                 database="postgres",
-                user="postgres.mhdermskrgmqoiabjie",
+                user="postgres.mhdermskrgmqoiiabjie",
                 password="Mjm1978*",
                 port=6543,
                 cursor_factory=RealDictCursor,

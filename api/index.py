@@ -35,19 +35,13 @@ async def test_db():
     try:
         import psycopg2
         from psycopg2.extras import RealDictCursor
-        db_url = os.getenv("DATABASE_URL")
-        if not db_url:
-            return {"status": "error", "message": "DATABASE_URL is not set"}
+        import os as _os
 
-        safe_url = db_url.split("@")[-1] if "@" in db_url else "url_parcial"
+        safe_url = "url_parcial"
 
-        # Conexão direta com parâmetros fixos
+        # Conectando com o nome de usuário correto (com dois 'i's: mhdermskrgmqoiiabjie)
         conn = psycopg2.connect(
-            host="aws-1-us-west-2.pooler.supabase.com",
-            database="postgres",
-            user="postgres.mhdermskrgmqoiabjie",
-            password="Mjm1978*",
-            port=6543,
+            "postgresql://postgres.mhdermskrgmqoiiabjie:Mjm1978%2A@aws-1-us-west-2.pooler.supabase.com:6543/postgres",
             cursor_factory=RealDictCursor,
             sslmode='require',
             connect_timeout=10
