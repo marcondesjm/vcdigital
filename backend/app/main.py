@@ -176,6 +176,56 @@ async def login(user: UserLogin):
     )
 
 
+@app.post("/register")
+async def register(data: UserRegister):
+    """Cadastra um novo usuário e escritório/tenant no sistema."""
+    from app.database import get_db_connection
+
+    # Verificar se email já existe
+    existing = get_user_by_email(data.email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Este e-mail já está cadastrado.")
+
+    user_id = str(uuid.uuid4())
+    tenant_id = f"tenant-{uuid.uuid4().hex[:8]}"
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        # 1. Criar Tenant
+        if is_sqlite_mode():
+            cursor.execute(
+                "INSERT INTO tenants (id, name, email, master_key_encrypted, created_at) VALUES (?, ?, ?, ?, ?)",
+                (tenant_id, f"Escritório de {data.name}", data.email, "master_key_placeholder", datetime.now().isoformat())
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO tenants (id, name, email, master_key_encrypted, created_at) VALUES (%s, %s, %s, %s, %s)",
+                (tenant_id, f"Escritório de {data.name}", data.email, "master_key_placeholder", datetime.now().isoformat())
+            )
+
+        # 2. Criar Usuário
+        if is_sqlite_mode():
+            cursor.execute(
+                "INSERT INTO users (id, tenant_id, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (user_id, tenant_id, data.email, data.password, data.role, datetime.now().isoformat())
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO users (id, tenant_id, email, password_hash, role, created_at) VALUES (%s, %s, %s, %s, %s, %s)",
+                (user_id, tenant_id, data.email, data.password, data.role, datetime.now().isoformat())
+            )
+
+        conn.commit()
+
+    return {
+        "status": "success",
+        "message": "Usuário cadastrado com sucesso!",
+        "user_id": user_id,
+        "tenant_id": tenant_id
+    }
+
+
 @app.post("/upload-certificate/")
 async def upload_certificate(
     file: UploadFile = File(...),

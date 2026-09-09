@@ -9,6 +9,12 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+class UserRegister(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str = "admin"  # 'admin' ou 'client'
+
 class EmployeeCreate(BaseModel):
     tenant_id: Optional[str] = None
     name: str

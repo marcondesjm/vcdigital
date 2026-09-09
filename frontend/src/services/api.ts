@@ -14,7 +14,7 @@ import type {
   UploadResponse,
 } from '../types'
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8001' : '')
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8001' : '/api')
 const electronApi = (window as any).api
 
 function unwrapError(e: unknown): string {
@@ -33,6 +33,20 @@ export async function login(email: string, password: string): Promise<User> {
       return await electronApi.login({ email, password })
     } else {
       const res = await axios.post(`${BACKEND_URL}/login`, { email, password })
+      return res.data
+    }
+  } catch (e) {
+    throw new Error(unwrapError(e))
+  }
+}
+
+
+export async function register(data: { name: string; email: string; password: string; role?: string }): Promise<{ status: string; message: string; user_id: string; tenant_id: string }> {
+  try {
+    if (electronApi?.register) {
+      return await electronApi.register(data)
+    } else {
+      const res = await axios.post(`${BACKEND_URL}/register`, data)
       return res.data
     }
   } catch (e) {
