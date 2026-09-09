@@ -19,10 +19,13 @@ class Settings(BaseSettings):
     # Supabase Configuration
     SUPABASE_URL: Optional[str] = None
     SUPABASE_KEY: Optional[str] = None
+    SUPABASE_ANON_KEY: Optional[str] = None
+    SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
     SUPABASE_JWT_SECRET: Optional[str] = None
+    DATABASE_URL: Optional[str] = None
 
     # Modo SQLite (MVP) - True por padrão, False quando Supabase está configurado
-    SQLITE_MODE: Optional[bool] = None
+    SQLITE_MODE: Optional[bool] = False
 
     # Ambiente
     ENVIRONMENT: str = "development"  # development, staging, production
@@ -46,6 +49,15 @@ def is_production() -> bool:
 
 def is_sqlite_mode() -> bool:
     """Verifica se deve usar SQLite (quando Supabase não está configurado)."""
+    # Se DATABASE_URL estiver presente, assumimos modo Supabase/PostgreSQL
+    # Isso força o modo Supabase quando a variável está no ambiente
+    if settings.DATABASE_URL:
+        return False
     if settings.SQLITE_MODE is not None:
         return settings.SQLITE_MODE
-    return not settings.SUPABASE_URL or not settings.SUPABASE_KEY
+    # Verificar se Supabase está configurado
+    supabase_configured = bool(
+        settings.SUPABASE_URL and
+        (settings.SUPABASE_KEY or settings.SUPABASE_ANON_KEY or settings.SUPABASE_SERVICE_ROLE_KEY)
+    )
+    return not supabase_configured

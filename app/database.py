@@ -118,37 +118,17 @@ def get_db_connection() -> Iterator[Any]:
         if not db_url:
             raise ValueError("DATABASE_URL não configurada no ambiente.")
 
-        # Se for URI, podemos extrair ou usar parâmetros fixos se falhar
+        # Conectar usando a URI DATABASE_URL diretamente
+        # O psycopg2 aceita a string de conexão completa como primeiro argumento
         try:
-            parsed = _up.urlparse(db_url)
-            username = parsed.username or "postgres.mhdermskrgmqoiiabjie"
-            password = _up.unquote(parsed.password or "Mjm1978*")
-            hostname = parsed.hostname or "aws-1-us-west-2.pooler.supabase.com"
-            port = parsed.port or 6543
-            dbname = parsed.path.lstrip('/') or "postgres"
-
             conn = psycopg2.connect(
-                host=hostname,
-                database=dbname,
-                user=username,
-                password=password,
-                port=port,
+                db_url,
                 cursor_factory=RealDictCursor,
                 sslmode='require',
                 connect_timeout=10
             )
-        except Exception:
-            # Fallback direto com a senha sem encoding problemático
-            conn = psycopg2.connect(
-                host="aws-1-us-west-2.pooler.supabase.com",
-                database="postgres",
-                user="postgres.mhdermskrgmqoiiabjie",
-                password="Mjm1978*",
-                port=6543,
-                cursor_factory=RealDictCursor,
-                sslmode='require',
-                connect_timeout=10
-            )
+        except Exception as e:
+            raise ValueError(f"Falha ao conectar ao banco de dados: {e}")
         try:
             yield conn
             conn.commit()

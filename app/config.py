@@ -16,9 +16,13 @@ class Settings(BaseSettings):
     # Em produção, deve ser uma chave de 32 bytes (44 caracteres base64 url-safe)
     VOCE_DIGITAL_MASTER_KEY: str = b'peNrjJ7xHXBM_FFJy9jTLNj_dGp2hmkoj-tXvIfw9lM='.decode()
 
-    # Supabase Configuration
+    # Supabase/PostgreSQL Configuration
+    # DATABASE_URL é a string de conexão PostgreSQL do Supabase.
+    DATABASE_URL: Optional[str] = None
     SUPABASE_URL: Optional[str] = None
     SUPABASE_KEY: Optional[str] = None
+    SUPABASE_ANON_KEY: Optional[str] = None
+    SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
     SUPABASE_JWT_SECRET: Optional[str] = None
 
     # Modo SQLite (MVP) - True por padrão, False quando Supabase está configurado
@@ -33,6 +37,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 # Instância global de configurações
@@ -46,6 +51,14 @@ def is_production() -> bool:
 
 def is_sqlite_mode() -> bool:
     """Verifica se deve usar SQLite (quando Supabase não está configurado)."""
+    # Se DATABASE_URL estiver presente, assumimos modo Supabase/PostgreSQL
+    if settings.DATABASE_URL:
+        return False
     if settings.SQLITE_MODE is not None:
         return settings.SQLITE_MODE
-    return not settings.SUPABASE_URL or not settings.SUPABASE_KEY
+    # Verificar se Supabase está configurado
+    supabase_configured = bool(
+        settings.SUPABASE_URL and
+        (settings.SUPABASE_KEY or settings.SUPABASE_ANON_KEY or settings.SUPABASE_SERVICE_ROLE_KEY)
+    )
+    return not supabase_configured
